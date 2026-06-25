@@ -1,0 +1,119 @@
+# Eggless baking corpus — add URLs here, scrape with scripts/scrape_corpus.py
+#
+# Usage:
+#   python scripts/scrape_corpus.py --limit 15
+#   python scripts/scrape_corpus.py --limit 50 --config corpus/sources.yaml
+
+settings:
+  output_dir: corpus/raw
+  delay_seconds: 2.0        # pause between requests (be polite)
+  skip_existing: true       # don't re-download files already on disk
+  format: markdown          # markdown | text
+
+articles:
+  # --- Food science ---
+  - url: https://www.mcgill.ca/oss/article/nutrition-you-asked/what-aquafaba
+    slug: mcgill-what-is-aquafaba
+    category: food-science
+    enabled: true
+
+  - url: https://www.sciencefocus.com/science/why-are-eggs-so-useful-in-baking-and-what-is-aquafaba
+    slug: bbc-science-focus-eggs-in-baking
+    category: food-science
+    enabled: true
+
+  # --- King Arthur (tested guides) ---
+  - url: https://www.kingarthurbaking.com/blog/2021/01/21/guide-for-substituting-eggs-best-egg-replacers
+    slug: king-arthur-egg-substitute-guide
+    category: tested-guides
+    enabled: true
+
+  - url: https://www.kingarthurbaking.com/blog/2020/08/26/a-guide-to-aquafaba
+    slug: king-arthur-guide-aquafaba
+    category: tested-guides
+    enabled: true
+
+  - url: https://www.kingarthurbaking.com/blog/2023/02/03/bake-egg-free
+    slug: king-arthur-bake-egg-free
+    category: tested-guides
+    enabled: true
+
+  # --- Serious Eats ---
+  - url: https://www.seriouseats.com/best-egg-substitutes-tested-11868466
+    slug: serious-eats-egg-substitutes-tested
+    category: tested-guides
+    enabled: true
+
+  - url: https://www.seriouseats.com/how-to-perfect-vegan-chocolate-chip-cookies-one-ingredient-at-a-time
+    slug: serious-eats-vegan-cookies-oat-slurry
+    category: tested-guides
+    enabled: true
+
+  - url: https://www.seriouseats.com/vegan-aquafaba-pancake-recipe
+    slug: serious-eats-aquafaba-pancakes
+    category: recipes
+    enabled: true
+
+  - url: https://www.seriouseats.com/aquafaba-meringue-frosting-5184219
+    slug: serious-eats-aquafaba-meringue-frosting
+    category: recipes
+    enabled: true
+
+  # --- Minimalist Baker ---
+  - url: https://minimalistbaker.com/guide-to-egg-substitutes/
+    slug: minimalist-baker-vegan-egg-substitutes
+    category: tested-guides
+    enabled: true
+
+  - url: https://minimalistbaker.com/how-to-make-a-flax-egg/
+    slug: minimalist-baker-flax-egg
+    category: techniques
+    enabled: true
+
+  # --- Blogs ---
+  - url: https://mommyshomecooking.com/the-ultimate-guide-to-egg-substitutes-in-baking/
+    slug: mommys-home-cooking-egg-substitutes
+    category: blogs
+    enabled: true
+
+  - url: https://www.egglesscooking.com/egg-substitutes/
+    slug: madhurams-egg-substitutes
+    category: blogs
+    enabled: true
+
+  # --- The Kitchn ---
+  - url: https://www.thekitchn.com/aquafaba-what-it-is-and-how-to-use-it-230155
+    slug: the-kitchn-aquafaba-explainer
+    category: tested-guides
+    enabled: true
+
+  - url: https://www.thekitchn.com/the-best-egg-substitutes-for-baking-230156
+    slug: the-kitchn-egg-substitutes-baking
+    category: tested-guides
+    enabled: true
+
+  # --- Extra sources (disabled by default — enable when scaling to 50+) ---
+  - url: https://www.kingarthurbaking.com/blog/2022/01/26/vegan-dairy-free-swiss-buttercream
+    slug: king-arthur-vegan-swiss-buttercream
+    category: recipes
+    enabled: false
+
+  - url: https://www.seriouseats.com/chocolate-mayonnaise-cake-recipe-8727794
+    slug: serious-eats-chocolate-mayonnaise-cake
+    category: recipes
+    enabled: false
+
+  - url: https://food52.com/blog/24986-the-best-vegan-egg-substitutes
+    slug: food52-vegan-egg-substitutes
+    category: tested-guides
+    enabled: false
+
+  - url: https://www.bonappetit.com/story/just-egg-review
+    slug: bon-appetit-just-egg-review
+    category: commercial-products
+    enabled: false
+
+  - url: https://www.peta.org/living/food/egg-replacements/
+    slug: peta-egg-replacements
+    category: commercial-products
+    enabled: false

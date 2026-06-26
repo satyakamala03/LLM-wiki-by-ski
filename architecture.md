@@ -1,4 +1,4 @@
-# Architecture — LLM Wiki
+# Architecture — LLM Wiki [Work In Progress]
 
 Living architecture diagrams for this project. **Update this file at the end of each phase.**
 

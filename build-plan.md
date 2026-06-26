@@ -223,10 +223,4 @@ Each phase maps to one of the challenge's steps. Within each phase, I've broken 
 
 ---
 
-## Suggested sequence and time estimate
-
-Phases 0–1 in your first session (setup + scaffolding). Phases 2–3 are the meatiest — budget several sessions there. Phases 4–5 are where it becomes genuinely useful. 6–8 are refinement.
-
----
-
 That's the full plan. 

@@ -23,4 +23,5 @@
 
 ## Overviews
 
+- [[Comparison of Chia Seeds and Flax Eggs in Cookies]] — - **Preparation**: To use chia seeds as an egg substitute, mix 1 tablespoon of chia seeds with 3 tablespoons of water and let it sit for about 15 minutes until (`topics/comparison-of-chia-seeds-and-flax-eggs-in-cookies.md`, created 2026-06-26)
 - [[Egg Substitutes Comparison]] — Egg substitutes play a crucial role in eggless baking, providing the necessary binding and leavening properties that eggs typically contribute to recipes. This (`topics/egg-substitutes-comparison.md`, created 2026-06-21, 2 sources)

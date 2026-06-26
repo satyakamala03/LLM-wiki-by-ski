@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import llm_wiki.env  # noqa: F401 — before embeddings / search imports
+
 from datetime import datetime
 from pathlib import Path
 

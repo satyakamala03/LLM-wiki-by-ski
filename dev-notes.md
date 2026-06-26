@@ -3,7 +3,7 @@
 Living design and development documentation for this project.  
 **Source of truth for requirements:** `coding-challenge-122-database-driven-llm-wiki.md`  
 **Implementation guide:** `build-plan.md` (helper only — do not treat as overriding the challenge spec)  
-**Last updated:** 2026-06-24 — Phase 7 complete (Steps 0–7); LangGraph lint; structural + LLM checks; interactive fixes verified  
+**Last updated:** 2026-06-26 — Phase 8 complete (Steps 0–8); Streamlit browse + chat + save answer  
 **Architecture diagrams:** [architecture.md](architecture.md) — update each phase
 
 ---
@@ -20,7 +20,7 @@ Living design and development documentation for this project.
 | Query system | Step 5 | Done | LangGraph query, `query` + `chat` CLI, save-to-wiki |
 | Multi-wiki / Oracle projects | Step 6 | Done | `wiki_projects` table, `list-projects`, `sync-project`, isolation by `project_name` |
 | Lint | Step 7 | Done | LangGraph lint, structural + LLM checks, interactive fixes, `wikis/lint-test/` |
-| UI | Step 8 | **Next** | |
+| UI | Step 8 | Done | Streamlit `app.py` — browse, chat, save answer; ingest via `cli.py ingest` |
 
 **Active wiki:** `wikis/eggless-baking/` (eggless baking & vegetarian cooking)  
 **Lint fixtures:** `wikis/lint-test/` (controlled Phase 7.5 test pages)  
@@ -32,13 +32,16 @@ Living design and development documentation for this project.
 
 ```
 LLM-wiki-by-ski/
+  app.py                      # Streamlit UI entry (Phase 8)
   cli.py                      # Dev CLI entry point
   dev-notes.md                # This file
   build-plan.md               # Personal implementation plan
   coding-challenge-122-...md  # Challenge spec (authoritative)
+  .streamlit/config.toml      # Streamlit server config (file watcher)
 
   llm_wiki/                   # Application code
     config/.env               # Secrets (never commit)
+    env.py                    # TF/transformers + Streamlit compat env
     wiki/                     # Phase 1 — scaffolding
     ingestion/                # Phase 2 — LangGraph pipeline
     index_log/                # Phase 3 — index.md, log.md, readers
@@ -48,6 +51,7 @@ LLM-wiki-by-ski/
     query/                    # Phase 5 — LangGraph query + save answer
     projects/                 # Phase 6 — Oracle wiki_projects registry
     lint/                     # Phase 7 — LangGraph lint + fixes
+    ui/                       # Phase 8 — Streamlit panels
     prompts/                  # LLM prompt templates
 
   wikis/                      # Wiki data (one folder per project)
@@ -135,7 +139,7 @@ corpus/raw/article.md  ──copy──►  wikis/<wiki>/raw/article.md  (read-o
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Batch ingest | **Implemented** | Default for Phase 2 |
-| Interactive takeaways (Step 2) | Deferred | Optional `--interactive` flag or Phase 8 UI |
+| Interactive takeaways (Step 2) | Deferred | Optional `--interactive` flag; ingest stays CLI |
 | Interactive contradiction fixes | **Implemented** | Phase 7 lint — approve/reject per issue (`cli.py lint`) |
 | Auto-note contradictions on pages | **Implemented** | `## Contradictions` section appended |
 
@@ -183,9 +187,29 @@ python3 scripts/verify_lint.py
 
 # Corpus scraping (Phase 0)
 python3 scripts/scrape_corpus.py --limit 15
+
+# Web UI (Phase 8)
+streamlit run app.py
 ```
 
 Global option: `--wikis-dir wikis` (default)
+
+### Streamlit UI (Phase 8)
+
+**Run:** `streamlit run app.py` (from repo root; loads `llm_wiki/config/.env`)
+
+| Area | Behavior |
+|------|----------|
+| Sidebar | Wiki selector, page tree (Sources / Entities / Concepts / Overviews), chat `top_k` slider, clear history |
+| Browse | Markdown viewer; `[[wikilinks]]` navigate via `?page=` |
+| Chat | `run_query` with follow-up `messages`; spinner; linkified citations |
+| Save | Per-answer expander → `save_answer_as_page` → `topics/` + index + embed |
+
+**Ingest (no UI):** `python3 cli.py ingest <wiki> <file.md>`
+
+**Env notes:** `USE_TF=0`, `TRANSFORMERS_NO_TF=1` in `.env` (see `.env.example`); `.streamlit/config.toml` sets `fileWatcherType = none` for PyTorch.
+
+**Module:** `llm_wiki/ui/` — `main`, `sidebar`, `browse`, `viewer`, `chat`, `wikilinks`, `errors`, `state`
 
 ---
 
@@ -296,6 +320,21 @@ OLLAMA_MODEL=llama3.2:3b
 **Verification:** `wikis/lint-test/` + `python3 scripts/verify_lint.py`
 
 **Module:** `llm_wiki/lint/`, `llm_wiki/wiki/contradictions.py`
+
+### Streamlit UI (Phase 8)
+
+See **CLI reference → Streamlit UI** above. Challenge Step 8 checklist:
+
+- [x] Launch interface and access it
+- [x] Ask questions — markdown + wikilink citations
+- [x] Click citation → opens page in Browse
+- [x] Follow-up questions retain context
+- [x] Browse tree reflects pages on disk
+- [x] Save answer as wiki page (sidebar updates)
+- [x] Ingest via CLI without launching UI
+- [x] Loading spinner during query
+
+**Optional (not built):** `llm-wiki` thin CLI wrapper; lint UI; in-app ingest.
 
 ### IngestionState key fields
 
@@ -410,10 +449,12 @@ python3 scripts/verify_lint.py
 
 ## What's next
 
-| Phase | Focus |
-|-------|-------|
-| 8 | Streamlit UI; optional interactive ingest |
+| Item | Focus |
+|------|-------|
+| Optional | `llm-wiki` CLI wrapper around `cli.py ingest` |
+| Optional | Lint panel in Streamlit |
+| Going further | Challenge “Going Further” ideas (graph viz, scheduled lint, etc.) |
 
 ---
 
-*Last updated: 2026-06-24 — Phase 7 lint system complete. Synced with [architecture.md](architecture.md).*
+*Last updated: 2026-06-26 — Phase 8 Streamlit UI complete. Synced with [architecture.md](architecture.md).*

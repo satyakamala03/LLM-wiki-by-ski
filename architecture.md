@@ -2,14 +2,14 @@
 
 Living architecture diagrams for this project. **Update this file at the end of each phase.**
 
-**Last updated:** 2026-06-24 — Phase 7 complete (Steps 0–7); LangGraph lint; structural + LLM checks; interactive fixes  
+**Last updated:** 2026-06-26 — Phase 8 complete (Steps 0–8); Streamlit browse + chat + save answer  
 **Companion doc:** [dev-notes.md](dev-notes.md)
 
 ---
 
-## 1. System overview (Phases 0–7)
+## 1. System overview (Phases 0–8)
 
-What exists today: full ingest → index/log → Oracle search → query agent → multi-wiki registry → **lint health-checks with interactive fixes**. Streamlit UI is Phase 8.
+What exists today: full ingest → index/log → Oracle search → query agent → multi-wiki registry → lint health-checks → **Streamlit web UI** (browse, chat, save answers).
 
 ```mermaid
 flowchart TB
@@ -21,6 +21,7 @@ flowchart TB
 
     subgraph dev [Developer]
         CLI[cli.py]
+        App[app.py\nStreamlit UI]
         Scraper[scripts/scrape_corpus.py]
         VerifyLint[scripts/verify_lint.py]
     end
@@ -35,6 +36,7 @@ flowchart TB
         QueryMod[query/\nLangGraph Q&A]
         ProjectsMod[projects/\nregistry + stats]
         LintMod[lint/\nLangGraph + fixes]
+        UIMod[ui/\nStreamlit panels]
         Prompts[prompts/*.md]
         Config[config/.env]
     end
@@ -54,6 +56,7 @@ flowchart TB
     CLI --> QueryMod
     CLI --> ProjectsMod
     CLI --> LintMod
+    App --> UIMod
     VerifyLint --> LintMod
     WikiMod --> Wikis
     Ingest --> WikiMod
@@ -80,6 +83,10 @@ flowchart TB
     LintMod --> EmbedMod
     LintMod --> OpenAI
     LintMod --> ProjectsMod
+    UIMod --> QueryMod
+    UIMod --> WikiMod
+    UIMod --> ProjectsMod
+    UIMod --> IndexLog
     DB --> Oracle
     Config --> Ingest
     Config --> WikiMod
@@ -87,15 +94,15 @@ flowchart TB
     Config --> DB
     Config --> QueryMod
     Config --> LintMod
+    Config --> UIMod
     Corpus -->|ingest via CLI| Ingest
     Ingest -->|copy to raw/| Wikis
     QueryMod -->|optional save| Wikis
+    UIMod -->|save answer| Wikis
     LintMod -->|optional fix| Wikis
-    UI[Phase 8\nStreamlit UI] -.-> QueryMod
-    UI -.-> LintMod
 ```
 
-**Solid lines** = implemented (Phases 0–7). **Dotted** = planned (Phase 8 UI only).
+**All components above are implemented** (Phases 0–8). Ingest and lint fixes remain CLI-first; the UI focuses on browse + query.
 
 ---
 
@@ -120,13 +127,12 @@ flowchart LR
     style P5 fill:#2d6a4f,color:#fff
     style P6 fill:#2d6a4f,color:#fff
     style P7 fill:#2d6a4f,color:#fff
-    style P8 fill:#40916c,color:#fff
+    style P8 fill:#2d6a4f,color:#fff
 ```
 
 | Color | Meaning |
 |-------|---------|
-| Dark green (`#2d6a4f`) | Done (Phases 0–7) |
-| Mid green (`#40916c`) | Next up (Phase 8) |
+| Dark green (`#2d6a4f`) | Done (Phases 0–8) |
 
 ---
 
@@ -778,58 +784,92 @@ flowchart TB
 
 ---
 
-## 13. Planned architecture (Phase 8)
+## 13. Phase 8 — Streamlit UI
 
-*Phases 0–7 are built; update this section when Phase 8 ships.*
+Web interface for browsing wiki pages and chatting with the query agent. Ingest and lint remain on `cli.py` (challenge Step 8 allows a separate ingestion CLI).
+
+### 13a. Module layout
 
 ```mermaid
 flowchart TB
-    subgraph done [Built — Phases 0–7]
-        Ingest[Ingestion graph\n+ sync_embeddings]
-        WikiFS[Wiki filesystem]
-        IndexLog[index_log module]
-        OllamaSvc[Ollama one-liners]
-        CLI3[CLI index and log]
-        DBMod[db + embeddings + search]
-        OracleDB[(Oracle wiki_pages\nvector + FTS indexes)]
-        CLISearch[CLI db-ping embed-wiki search]
-        QueryMod[query LangGraph\nquery + chat CLI]
-        SaveAns[save answer to topics/]
-        Projects[wiki_projects table\nlist-projects sync-project]
-        LintMod[lint LangGraph\nstructural + LLM checks\ninteractive fixes]
-        LintCLI[CLI lint + verify_lint.py]
+    subgraph entry [Entry]
+        AppPy[app.py\nenv bootstrap + dotenv]
+        Main[ui/main.py\nrender_app]
     end
 
-    subgraph p8 [Phase 8 — next]
-        UI[Streamlit web UI\nrich chat + browse]
+    subgraph sidebar [Sidebar]
+        Sel[sidebar.py\nwiki selector]
+        Tree[sidebar.py\npage tree by type]
+        ChatSet[sidebar.py\ntop_k slider clear chat]
     end
 
-    Ingest --> WikiFS
-    Ingest --> IndexLog
-    Ingest --> DBMod
-    Ingest --> OllamaSvc
-    Ingest --> Projects
-    CLI3 --> IndexLog
-    CLISearch --> DBMod
-    DBMod --> OracleDB
-    Projects --> OracleDB
-    QueryMod --> DBMod
-    QueryMod --> IndexLog
-    QueryMod --> SaveAns
-    QueryMod --> Projects
-    SaveAns --> WikiFS
-    SaveAns --> DBMod
-    LintMod --> WikiFS
-    LintMod --> IndexLog
-    LintMod --> DBMod
-    LintCLI --> LintMod
-    UI --> QueryMod
-    UI --> LintMod
-    UI --> Ingest
+    subgraph panels [Main panels]
+        Browse[browse.py + viewer.py\npage tree + markdown viewer]
+        Chat[chat.py\nrun_query save answer]
+        Links[wikilinks.py\n?page= navigation]
+        Err[errors.py\nfriendly error text]
+    end
 
-    style done fill:#2d6a4f,color:#fff
-    style p8 fill:#40916c,color:#fff
+    subgraph reused [Reused backend]
+        RQ[query.run_query]
+        Save[query.save_answer_as_page]
+        Proj[projects.list_all_projects]
+        WM[wiki_manager\nresolve_wikilink]
+    end
+
+    AppPy --> Main
+    Main --> Sel
+    Main --> Tree
+    Main --> ChatSet
+    Main --> Browse
+    Main --> Chat
+    Browse --> Links
+    Browse --> WM
+    Chat --> RQ
+    Chat --> Save
+    Chat --> Links
+    Chat --> Err
+    Sel --> Proj
+    RQ --> Search[search.hybrid_search]
+    Save --> IndexLog[index_log rebuild]
+    Save --> Embed[embeddings.sync_page_paths]
 ```
+
+### 13b. User flows
+
+```mermaid
+flowchart LR
+    subgraph browse [Browse tab]
+        B1[Sidebar pick page] --> B2[viewer renders body]
+        B2 --> B3[wikilink click\n?page=rel_path]
+        B3 --> B2
+    end
+
+    subgraph chat [Chat tab]
+        C1[chat_input question] --> C2[spinner\nrun_query]
+        C2 --> C3[markdown answer\nlinkified citations]
+        C3 --> C4{Save to wiki?}
+        C4 -->|yes| C5[save_answer_as_page\ntopics/ + index + embed]
+        C5 --> B1
+        C2 --> C6[follow-up\nmessages in session]
+        C6 --> C1
+    end
+```
+
+| UI area | Implementation |
+|---------|----------------|
+| Wiki selector | `list_all_projects` (disk + Oracle), session `wiki_name` |
+| Page tree | Frontmatter `type` → Sources / Entities / Concepts / Overviews |
+| Page viewer | `parse_page` + `linkify_wikilinks` → `?page=` links |
+| Chat | `st.chat_message` history, `run_query(..., messages=)` |
+| Save answer | Per-reply expander → `save_answer_as_page` |
+| Settings | Sidebar: `top_k` 3–20, clear chat, wiki path |
+
+**Env / ops:** `llm_wiki/env.py` sets `USE_TF=0` before transformers; `.streamlit/config.toml` uses `fileWatcherType = none` (PyTorch watcher noise).
+
+**Run:** `streamlit run app.py`
+
+**Not in UI (by design):** ingest (`cli.py ingest`), lint fixes (`cli.py lint`). Optional future: `llm-wiki` CLI wrapper.
 
 ---
 
@@ -841,7 +881,7 @@ When completing a phase:
 2. Update **Section 2** roadmap colors (done / partial / planned).
 3. Add or expand a dedicated section with a new diagram (mirror Phase 1–2 pattern).
 4. Update **Section 1** system overview — solid vs dotted lines.
-5. Refine **Section 12** — move components from planned to built.
+5. Refine the latest phase section — add diagrams for new work (e.g. Section 13 for Phase 8).
 6. Note changes in [dev-notes.md](dev-notes.md) project status table.
 
 **Preview:** Open this file in the Cursor/VS Code Markdown preview (`Cmd+Shift+V`) to render Mermaid diagrams. For ASCII fallbacks in plain terminals, ask and we can add a compact text version per section.

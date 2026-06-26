@@ -1,10 +1,10 @@
 # LLM Wiki
 
-A database-driven personal knowledge base with an LLM agent that ingests sources, maintains a markdown wiki, answers questions with citations, and lint-checks consistency.
+A database-driven personal knowledge base with an LLM agent that ingests sources, maintains a markdown wiki, answers questions with citations, lint-checks consistency, and provides a Streamlit web UI.
 
 Built for [Coding Challenge #122 — Database-Driven LLM Wiki](coding-challenge-122-database-driven-llm-wiki.md).
 
-## Features (Phases 0–7)
+## Features (Phases 0–8)
 
 - Wiki scaffolding with YAML frontmatter and `SCHEMA.md`
 - LangGraph source ingestion → summaries, entities, topics
@@ -13,6 +13,7 @@ Built for [Coding Challenge #122 — Database-Driven LLM Wiki](coding-challenge-
 - Query/chat with cited answers and save-to-wiki
 - Multi-wiki project registry (`wiki_projects`)
 - Lint: structural + LLM checks with interactive fixes
+- **Streamlit UI:** browse page tree, chat with follow-ups, save answers
 
 ## Quick start
 
@@ -25,6 +26,15 @@ python3 cli.py db-ping
 python3 cli.py list-projects
 python3 cli.py query eggless-baking "How does aquafaba work as an egg substitute?"
 python3 cli.py lint eggless-baking --checks structural --report-only
+
+# Web UI (browse + chat)
+streamlit run app.py
+```
+
+Add sources without the UI:
+
+```bash
+python3 cli.py ingest eggless-baking corpus/raw/king-arthur-guide-aquafaba.md
 ```
 
 See [dev-notes.md](dev-notes.md) for full CLI reference and [architecture.md](architecture.md) for diagrams.
@@ -32,9 +42,11 @@ See [dev-notes.md](dev-notes.md) for full CLI reference and [architecture.md](ar
 ## Layout
 
 ```
+app.py              # Streamlit UI
 cli.py              # Dev CLI
-llm_wiki/           # Application code
+llm_wiki/           # Application code (ui/, query/, ingestion/, …)
 wikis/              # Wiki projects (eggless-baking, lint-test, …)
+.streamlit/         # Streamlit config
 corpus/raw/         # Staging articles before ingest
 scripts/            # scrape_corpus.py, verify_lint.py, Oracle DDL
 ```

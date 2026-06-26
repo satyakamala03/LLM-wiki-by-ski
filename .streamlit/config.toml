@@ -1,0 +1,4 @@
+# Streamlit + PyTorch (sentence-transformers): disable auto file watcher to avoid
+# torch.classes path inspection errors in the terminal (chat still works either way).
+[server]
+fileWatcherType = "none"

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import array
 
+import llm_wiki.env  # noqa: F401
+
 from llm_wiki.db.connection import oracle_connection
 from llm_wiki.embeddings.model import embed_query
 from llm_wiki.search.types import SearchResult

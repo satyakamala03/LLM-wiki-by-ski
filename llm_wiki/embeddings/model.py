@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
-import os
-
-# Must be set before sentence_transformers / transformers import (Keras 3 conflict).
-os.environ["USE_TF"] = "0"
-os.environ.setdefault("TRANSFORMERS_NO_TF", "1")
+import llm_wiki.env  # noqa: F401 — before sentence_transformers / transformers
 
 from functools import lru_cache
 
@@ -18,8 +14,14 @@ QUERY_PREFIX = "search_query: "
 
 @lru_cache(maxsize=1)
 def _get_model():
+    from llm_wiki.env import apply_tf_compat
+
+    apply_tf_compat()
     from sentence_transformers import SentenceTransformer
 
+    from llm_wiki.env import patch_torch_for_streamlit_watcher
+
+    patch_torch_for_streamlit_watcher()
     return SentenceTransformer(EMBEDDING_MODEL_NAME, trust_remote_code=True)
 
 

@@ -7,3 +7,4 @@ langchain
 langchain-openai
 langchain-ollama
 langgraph
+streamlit>=1.28.0
